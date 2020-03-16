@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
   StyleSheet,
   Text,
@@ -6,49 +6,42 @@ import {
   Button,
 } from 'react-native'
 import PropTypes from 'prop-types'
-import Geolocation from '@react-native-community/geolocation'
+import Boundary, { Events } from 'react-native-boundary'
 
-const TodoItem = ({ title, id, onDelete }) => {
+const TodoItem = ({ title, id: itemId, onDelete }) => {
 
-  const checkLocation = () => {
-    Geolocation.getCurrentPosition(
-      (position) => {
-        checkDistanceToHome(position.coords.latitude, position.coords.longitude)
-        console.log(position)
-      },
-      (error) => {
-        // See error code charts below.
-        console.log(error.code, error.message)
-      },
-      { enableHighAccuracy: true }
-    )
+  const [isTracking, setIsTracking] = useState(false)
+
+  const startTracking = () => {
+    Boundary.add({
+      lat: 52.103520,
+      lng: 4.281690,
+      radius: 50, // in meters
+      id: 'Home',
+    }).then(() => {
+      console.log('success!')
+      setIsTracking(true)
+    })
+      .catch((e) => console.log('error:', e))
+
+    Boundary.on(Events.ENTER, (id) => {
+      console.log(`Get out of my ${id}!!`)
+    })
+
+    Boundary.on(Events.EXIT, (id) => {
+      console.log(`Ya! You better get out of my ${id}!!`)
+    })
   }
 
-  const checkDistanceToHome = (lat1, lon1) => {
-    // Home address:
-    const lat2 = 52.103520
-    const lon2 = 4.281690
-
-    console.log(lat1)
-    console.log(lon1)
-
-    if ((lat1 === lat2) && (lon1 === lon2)) {
-      return 0
-    }
-    const radlat1 = Math.PI * lat1 / 180
-    const radlat2 = Math.PI * lat2 / 180
-    const theta = lon1 - lon2
-    const radtheta = Math.PI * theta / 180
-    let dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta)
-    if (dist > 1) {
-      dist = 1
-    }
-    dist = Math.acos(dist)
-    dist = dist * 180 / Math.PI
-    dist = dist * 60 * 1.1515
-    dist *= 1.609344 * 1000
-
-    console.log(dist.toFixed())
+  const stopTracking = () => {
+    Boundary.off(Events.ENTER)
+    Boundary.off(Events.EXIT)
+    Boundary.remove('Home')
+      .then(() => {
+        console.log('Tracking is off')
+        setIsTracking(false)
+      })
+      .catch((e) => console.log('Failed to turn tracking off:', e))
   }
 
   return (
@@ -59,16 +52,31 @@ const TodoItem = ({ title, id, onDelete }) => {
         </View>
       </View>
       <View style={styles.buttons}>
-        <Button
-          onPress={Geolocation.watchPosition(
-            checkLocation,
-            (e) => console.log(e),
+        {isTracking
+          ? (
+            <Button
+            // onPress={Geolocation.watchPosition(
+            //   checkLocation,
+            //   (e) => console.log(e),
+            // )}
+              onPress={stopTracking}
+              style={styles.button}
+              title="Don't remind me at home"
+            />
+          )
+          : (
+            <Button
+            // onPress={Geolocation.watchPosition(
+            //   checkLocation,
+            //   (e) => console.log(e),
+            // )}
+              onPress={startTracking}
+              style={styles.button}
+              title="Remind me at home"
+            />
           )}
-          style={styles.button}
-          title="Remind me at home"
-        />
         <Button
-          onPress={() => onDelete(id)}
+          onPress={() => onDelete(itemId)}
           style={styles.button}
           color="red"
           title="Delete"

@@ -14,6 +14,7 @@
     "prop-types": "^15.7.2",
     "react": "16.9.0",
     "react-native": "0.61.5",
+    "react-native-boundary": "^1.1.1",
     "react-native-simple-native-geofencing": "^0.8.5",
     "react-redux": "^7.2.0",
     "redux": "^4.0.5",
