@@ -65,7 +65,7 @@ const TodoItem = ({ title, id, onDelete }) => {
             (e) => console.log(e),
           )}
           style={styles.button}
-          title="Don't remind me at home"
+          title="Remind me at home"
         />
         <Button
           onPress={() => onDelete(id)}
