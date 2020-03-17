@@ -4,8 +4,6 @@ import {
   Text,
   View,
   Button,
-  PermissionsAndroid,
-  Platform,
 } from 'react-native'
 import PropTypes from 'prop-types'
 import RNSimpleNativeGeofencing from 'react-native-simple-native-geofencing'
@@ -16,30 +14,7 @@ const TodoItem = ({ title, id, onDelete }) => {
 
   const [hasGeoFence, setHasGeoFence] = useState(false)
 
-  const requestLocationPermission = async () => {
-    try {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-        {
-          title: 'Location permission',
-          message: 'Needed obviously',
-        }
-      )
-      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-        console.log('Granted Permission')
-      } else {
-        console.log('Denied Permission')
-      }
-    } catch (err) {
-      console.warn(err)
-    }
-  }
-
   useEffect(() => {
-    if (Platform.OS === 'android') {
-      requestLocationPermission()
-    }
-
     RNSimpleNativeGeofencing.initNotification(
       {
         channel: {
